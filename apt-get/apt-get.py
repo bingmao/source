@@ -120,13 +120,13 @@ def decompression(path, filename):
 
 
 def nfs_deploy(path):
-    etc = exec_root_cmd('find %s -name "etc"' % (path))
-    var = exec_root_cmd('find %s -name "var"' % (path))
+    etc = exec_root_cmd('find %s/source -name "etc"' % (path))
+    var = exec_root_cmd('find %s/source -name "var"' % (path))
     if etc[1] and var[1]:
         result = exec_root_cmd('find /etc/apt/ -name "sources.list_backup"')
         if not result[1]:
             exec_root_cmd('mv /etc/apt/sources.list /etc/apt/sources.list_backup')
-        exec_root_cmd('mv %s/etc/apt/sources.list /etc/apt/sources.list' % (path))
+        exec_root_cmd('cp %s/source/etc/apt/sources.list /etc/apt/sources.list' % (path))
         exec_root_cmd('mv /var/lib/apt/lists /var/lib/apt/lists_backup')
         exec_root_cmd('ln -sf %s/source/var/lib/apt/lists /var/lib/apt/lists' % (path))
         exec_root_cmd('cp -Rf /var/cache/apt /var/cache/apt_backup')
@@ -143,7 +143,7 @@ def single_node_deploy(path, filename):
         nfs_deploy(path)
 
 def undeploy():
-    exec_root_cmd('cp /etc/apt/sources.list_backup /etc/apt/sources.list')
+    exec_root_cmd('mv /etc/apt/sources.list_backup /etc/apt/sources.list')
     exec_root_cmd('rm /var/lib/apt/lists')
     exec_root_cmd('mv /var/lib/apt/lists_backup /var/lib/apt/lists')
     exec_root_cmd('find /var/cache/apt -type l -exec rm -rf {} \;')
