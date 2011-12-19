@@ -173,6 +173,7 @@ if __name__ == '__main__':
             if (result):
                 single_node_deploy(path, sys.argv[2])
             else:
+                print 'file "%s" not exit' % (sys.argv[2])
         elif(sys.argv[1] == "-u" or sys.argv[1] == "--undeploy"):
             undeploy()
     else:
