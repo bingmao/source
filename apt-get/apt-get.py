@@ -139,8 +139,8 @@ def nfs_deploy(path):
 
 def single_node_deploy(path, filename):
     #path = os.path.dirname(os.path.abspath(__file__))
-    if decompression(path):
-        nfs_deploy(path, filename)
+    if decompression(path, filename):
+        nfs_deploy(path)
 
 def undeploy():
     exec_root_cmd('cp /etc/apt/sources.list_backup /etc/apt/sources.list')
