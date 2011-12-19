@@ -2,6 +2,7 @@ import commands
 import sys
 import logging
 import os
+import time
 
 LOGGER = logging.getLogger("deploy")
 
@@ -78,12 +79,14 @@ def helper():
     print usage
 
 def tar():
-    result = exec_root_cmd('tar -cvf apt-get.tar /etc/apt/sources.list /var/lib/apt/lists /var/cache/apt/*')
+    LD = time.localtime()
+    filename = '%s_%s_%s_%s_%s_%s_apt-get.tar' % (LD.tm_year, LD.tm_mon, LD.tm_mday, LD.tm_hour, LD.tm_min, LD.tm_sec)
+    result = exec_root_cmd('tar -cvf %s /etc/apt/sources.list /var/lib/apt/lists /var/cache/apt/*' % (filename))
 
-def decompression(path):
+def decompression(path, filename):
     #path = os.path.dirname(os.path.abspath(__file__))
 
-    result = exec_root_cmd('find -name "apt-get.tar"')
+    result = exec_root_cmd('find -name "%s"' % (filename))
     #for line in result[1].split("\n"):
     if result[1]:
         #print result[1]
@@ -102,7 +105,7 @@ def decompression(path):
             elif result == 'n' or result == 'N':
                 pass
                 
-        result = exec_root_cmd('tar -xvf %s/apt-get.tar -C %s/source/' % (path, path))
+        result = exec_root_cmd('tar -xvf %s/%s -C %s/source/' % (path, filename, path))
         finish = False
         for line in result[1].split("\n"):
             print line
@@ -134,10 +137,10 @@ def nfs_deploy(path):
     else:
         print 'source error'
 
-def single_node_deploy(path):
+def single_node_deploy(path, filename):
     #path = os.path.dirname(os.path.abspath(__file__))
     if decompression(path):
-        nfs_deploy(path)
+        nfs_deploy(path, filename)
 
 def undeploy():
     exec_root_cmd('cp /etc/apt/sources.list_backup /etc/apt/sources.list')
@@ -158,11 +161,18 @@ if __name__ == '__main__':
         if(sys.argv[1] == "-t" or sys.argv[1] == "--tar"):
             tar()
         elif(sys.argv[1] == "-d" or sys.argv[1] == "--decompression"):
-            decompression(path)
+            result = exec_root_cmd('find -name "%s"' % (sys.argv[2]))
+            if (result):
+                decompression(path, sys.argv[2])
+            else:
+                print 'file "%s" not exit' % (sys.argv[2])
         elif(sys.argv[1] == "-n" or sys.argv[1] == "--nfs_deploy"):
             nfs_deploy(path)
         elif(sys.argv[1] == "-s" or sys.argv[1] == "--single_node_deploy"):
-            single_node_deploy(path)
+            result = exec_root_cmd('find -name "%s"' % (sys.argv[2]))
+            if (result):
+                single_node_deploy(path, sys.argv[2])
+            else:
         elif(sys.argv[1] == "-u" or sys.argv[1] == "--undeploy"):
             undeploy()
     else:
